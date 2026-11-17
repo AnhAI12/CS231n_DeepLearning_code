@@ -1,7 +1,4 @@
-from builtins import range
-from builtins import object
 import numpy as np
-from past.builtins import xrange
 
 
 class KNearestNeighbor(object):
@@ -66,10 +63,12 @@ class KNearestNeighbor(object):
         """
         num_test = X.shape[0]
         num_train = self.X_train.shape[0]
+        print(X.shape, self.X_train.shape)
         dists = np.zeros((num_test, num_train))
         for i in range(num_test):
             for j in range(num_train):
                 # a = np.linalg.norm(X[i] - self.X_train[j])
+                a = np.sqrt(np.sum(np.square(X[i] - self.X_train[j])))
                 dists[i,j] = a
                 
         return dists
@@ -91,7 +90,8 @@ class KNearestNeighbor(object):
             # points, and store the result in dists[i, :].                        #
             # Do not use np.linalg.norm().                                        #
             #######################################################################
-            pass
+            dists[i,:] = np.sqrt(np.sum(np.square(self.X_train - X[i]), axis=1))
+            #use broadcasting
         return dists
 
     def compute_distances_no_loops(self, X):
@@ -139,6 +139,7 @@ class KNearestNeighbor(object):
             # A list of length k storing the labels of the k nearest neighbors to
             # the ith test point.
             closest_y = []
+            indx = []
             #########################################################################
             # TODO:                                                                 #
             # Use the distance matrix to find the k nearest neighbors of the ith    #
@@ -146,8 +147,11 @@ class KNearestNeighbor(object):
             # neighbors. Store these labels in closest_y.                           #
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
-
-
+            a = np.argsort(dists[i]) #trar vee mang indx đc sắp theo giá trị nhỏ -> lớn
+            mask = list(range(k))
+            indx = a[mask]
+            closest_y = self.y_train[indx]
+            # closest_y = self.y_train[np.argsort(dists[i])[:k]]
             #########################################################################
             # TODO:                                                                 #
             # Now that you have found the labels of the k nearest neighbors, you    #
@@ -155,6 +159,6 @@ class KNearestNeighbor(object):
             # Store this label in y_pred[i]. Break ties by choosing the smaller     #
             # label.                                                                #
             #########################################################################
-
+            y_pred[i] = np.argmax(np.bincount(closest_y))
 
         return y_pred
